@@ -1,0 +1,17 @@
+from flask import Flask, jsonify
+from flask_cors import CORS
+from services import check_all_services
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/api/health")
+def health():
+    return jsonify({"status": "ok"})
+
+@app.route("/api/services")
+def services():
+    return jsonify(check_all_services())
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
