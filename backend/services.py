@@ -1,5 +1,6 @@
 import requests
 import time
+from database import get_connection
 
 MONITORED_SERVICES = [
     {"id": 1, "name": "JSONPlaceholder", "url": "https://jsonplaceholder.typicode.com/posts/1"},
@@ -13,22 +14,33 @@ def check_service(service):
         response = requests.get(service["url"], timeout=5)
         response_time_ms = round((time.time() - start) * 1000)
         status = "up" if response.status_code < 400 else "down"
-        return {
-            "id": service["id"],
-            "name": service["name"],
-            "status": status,
-            "status_code": response.status_code,
-            "response_time_ms": response_time_ms
-        }
+        status_code = response.status_code
     except requests.exceptions.RequestException:
         response_time_ms = round((time.time() - start) * 1000)
-        return {
-            "id": service["id"],
-            "name": service["name"],
-            "status": "down",
-            "status_code": None,
-            "response_time_ms": response_time_ms
-        }
+        status = "down"
+        status_code = None
+
+    result = {
+        "id": service["id"],
+        "name": service["name"],
+        "status": status,
+        "status_code": status_code,
+        "response_time_ms": response_time_ms
+    }
+
+    save_check(result)
+    return result
+
+def save_check(result):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO checks (service_id, service_name, status, status_code, response_time_ms)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (result["id"], result["name"], result["status"], result["status_code"], result["response_time_ms"]))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
 def check_all_services():
     return [check_service(s) for s in MONITORED_SERVICES]
