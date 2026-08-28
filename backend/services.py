@@ -29,6 +29,10 @@ def check_service(service):
     }
 
     save_check(result)
+
+    if status == "down":
+        save_alert(result)
+
     return result
 
 def save_check(result):
@@ -38,6 +42,18 @@ def save_check(result):
         INSERT INTO checks (service_id, service_name, status, status_code, response_time_ms)
         VALUES (%s, %s, %s, %s, %s)
     """, (result["id"], result["name"], result["status"], result["status_code"], result["response_time_ms"]))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def save_alert(result):
+    conn = get_connection()
+    cursor = conn.cursor()
+    message = f"{result['name']} is down (status code: {result['status_code']})"
+    cursor.execute("""
+        INSERT INTO alerts (service_id, service_name, message)
+        VALUES (%s, %s, %s)
+    """, (result["id"], result["name"], message))
     conn.commit()
     cursor.close()
     conn.close()
