@@ -1,8 +1,9 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from database import get_connection, get_service_history
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from services import check_all_services
-from database import get_connection
+
 
 app = Flask(__name__)
 CORS(app)
@@ -32,5 +33,11 @@ def alerts():
     cursor.close()
     conn.close()
     return jsonify(result)
+
+@app.route("/api/services/<int:service_id>/history")
+def service_history(service_id):
+    days = request.args.get("days", default=90, type=int)
+    return jsonify(get_service_history(service_id, days))
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000, use_reloader=False)

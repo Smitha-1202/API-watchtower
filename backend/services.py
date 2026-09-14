@@ -6,6 +6,7 @@ MONITORED_SERVICES = [
     {"id": 1, "name": "JSONPlaceholder", "url": "https://jsonplaceholder.typicode.com/posts/1"},
     {"id": 2, "name": "Open-Meteo Weather", "url": "https://api.open-meteo.com/v1/forecast?latitude=17.38&longitude=78.48&current_weather=true"},
     {"id": 3, "name": "GitHub API", "url": "https://api.github.com"},
+    {"id": 4, "name": "Broken Test API", "url": "https://this-does-not-exist-12345.com"},
 ]
 
 def check_service(service):
@@ -23,6 +24,7 @@ def check_service(service):
     result = {
         "id": service["id"],
         "name": service["name"],
+        "url": service["url"],
         "status": status,
         "status_code": status_code,
         "response_time_ms": response_time_ms
