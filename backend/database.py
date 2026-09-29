@@ -72,5 +72,21 @@ def get_service_history(service_id, days=90):
 
     return {"history": history, "uptime_pct": uptime_pct}
 
+def get_recent_response_trend(limit=10):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT checked_at, AVG(response_time_ms) AS avg_response_time_ms
+        FROM checks
+        GROUP BY checked_at
+        ORDER BY checked_at DESC
+        LIMIT %s
+    """, (limit,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    rows.reverse()
+    return rows
+
 if __name__ == "__main__":
     create_table()

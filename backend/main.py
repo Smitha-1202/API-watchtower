@@ -3,6 +3,7 @@ from database import get_connection, get_service_history
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from services import check_all_services
+from database import get_connection, get_service_history, get_recent_response_trend
 
 
 app = Flask(__name__)
@@ -38,6 +39,11 @@ def alerts():
 def service_history(service_id):
     days = request.args.get("days", default=90, type=int)
     return jsonify(get_service_history(service_id, days))
+
+@app.route("/api/response-trend")
+def response_trend():
+    limit = request.args.get("limit", default=10, type=int)
+    return jsonify(get_recent_response_trend(limit))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, use_reloader=False)
